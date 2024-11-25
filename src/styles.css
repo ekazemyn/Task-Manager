@@ -375,4 +375,207 @@ button:hover {
       font-size: 8px; /* Adjust task size */
     }
   }
+
+  /* styles.css */
+
+/* ... existing styles ... */
+
+/* Schedule Cell */
+.schedule-table td {
+    position: relative;
+    height: 60px; /* Adjust the height to represent each hour */
+    padding: 0; /* Remove padding for accurate positioning */
+  }
   
+  .schedule-cell {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .cell-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .cell-content.free-time {
+    background-color: rgba(76, 175, 80, 0.1); /* Light green background for free time */
+  }
+  
+  .task {
+    position: absolute;
+    left: 0;
+    right: 0;
+    background: #4caf50;
+    color: white;
+    font-size: 10px;
+    padding: 2px;
+    border-radius: 3px;
+    text-align: center;
+    box-sizing: border-box;
+  }
+  
+  /* Adjust task positioning within the cell */
+  .task {
+    position: absolute;
+    left: 1px;
+    right: 1px;
+  }
+
+/* Schedule Grid */
+.schedule-container {
+    position: relative;
+    margin: 20px auto;
+    width: 100%;
+    max-width: 1100px;
+    height: 1500px; /* Adjust as needed */
+    border: 1px solid #ddd;
+    overflow-y: scroll;
+    background-color: #fff; /* White background */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr);
+    grid-template-rows: 50px repeat(96, 15px); /* 96 intervals of 15 minutes */
+    position: relative;
+  }
+  
+  .grid-header {
+    background-color: #f5f5f5;
+    text-align: center;
+    font-weight: bold;
+    border-bottom: 1px solid #ccc;
+    padding: 10px 0;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    font-size: 14px;
+  }
+  
+  .time-column {
+    grid-column: 1 / 2;
+    background-color: #f5f5f5;
+    border-right: 1px solid #ccc;
+    position: sticky;
+    left: 0;
+    z-index: 2;
+  }
+  
+  .time-label {
+    grid-column: 1 / 2;
+    border-bottom: 1px solid #eee;
+    text-align: right;
+    font-size: 12px;
+    padding-right: 5px;
+    color: #555;
+    background-color: #fafafa;
+    position: sticky;
+    left: 0;
+    z-index: 1;
+  }
+  
+  .grid-cell {
+    position: relative;
+    border-bottom: 1px solid #eee;
+    border-right: 1px solid #eee;
+    background-color: #fff;
+  }
+  
+  .grid-cell:nth-child(even) {
+    background-color: #fbfbfb;
+  }
+  
+  .free-time-cell {
+    background-color: rgba(129, 199, 132, 0.2); /* Light green */
+    /* grid positioning is set inline in the React component */
+  }
+  
+  .task-block {
+    background-color: #449336; 
+    color: #fff;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    font-size: 12px;
+    text-align: center;
+    padding: 2px;
+    box-sizing: border-box;
+    z-index: 3;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+    /* grid positioning is set inline in the React component */
+  }
+  
+  .task-block:hover {
+    background-color: #36752b;
+    transform: scale(1.02);
+  }
+  
+  .task-block::after {
+    content: attr(data-task-name);
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    padding: 4px 8px;
+    font-size: 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, top 0.2s;
+    z-index: 4;
+  }
+  
+  .task-block:hover::after {
+    opacity: 1;
+    top: calc(100% + 5px);
+  }
+  
+  .free-time-cell::after {
+    content: 'Free Time';
+    position: absolute;
+    top: 2px;
+    left: 4px;
+    font-size: 10px;
+    color: #388e3c;
+  }
+  
+  .grid-cell:hover {
+    background-color: #f3fff0;
+  }
+  
+  .schedule-container::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .schedule-container::-webkit-scrollbar-thumb {
+    background-color: #b0bec5;
+    border-radius: 4px;
+  }
+  
+  .schedule-container::-webkit-scrollbar-track {
+    background-color: #eceff1;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .grid-header {
+      font-size: 12px;
+      padding: 8px 0;
+    }
+  
+    .time-label {
+      font-size: 10px;
+    }
+  
+    .task-block {
+      font-size: 10px;
+    }
+  }

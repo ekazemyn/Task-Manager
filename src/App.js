@@ -1,3 +1,4 @@
+// App.js
 import React, { useState } from 'react';
 import AddFreeTime from './components/AddFreeTime';
 import AddTask from './components/AddTask';
@@ -38,36 +39,99 @@ const App = () => {
   };
 
   const addTask = (task) => {
-    const availableSlots = freeTime[task.day] || [];
     const taskDuration = task.duration * 60; // Task duration in minutes
+    let taskScheduledDays = [];
+    let unscheduledDays = [];
 
-    for (let i = 0; i < availableSlots.length; i++) {
-      const slot = availableSlots[i];
-      const slotDuration = slot.end - slot.start;
+    for (const day of task.days) {
+      const availableSlots = freeTime[day] || [];
+      let taskScheduled = false;
 
-      if (slotDuration >= taskDuration) {
-        const taskStartTime = slot.start;
-        const taskEndTime = taskStartTime + taskDuration;
+      for (let i = 0; i < availableSlots.length; i++) {
+        const slot = availableSlots[i];
+        const slotDuration = slot.end - slot.start;
 
-        setTasks((prev) => [
-          ...prev,
-          { ...task, start: taskStartTime, end: taskEndTime },
-        ]);
+        if (slotDuration >= taskDuration) {
+          const taskStartTime = slot.start;
+          const taskEndTime = taskStartTime + taskDuration;
 
-        const updatedSlots = [
-          ...availableSlots.slice(0, i),
-          ...(slotDuration === taskDuration
-            ? availableSlots.slice(i + 1) // Remove the slot if fully occupied
-            : [{ start: taskEndTime, end: slot.end }]), // Update the remaining slot
-        ];
+          setTasks((prev) => [
+            ...prev,
+            { ...task, start: taskStartTime, end: taskEndTime, day },
+          ]);
 
-        setFreeTime((prev) => ({ ...prev, [task.day]: updatedSlots }));
-        showPopup(`Added task "${task.name}" to ${task.day}`);
-        return;
+          const updatedSlots = [
+            ...availableSlots.slice(0, i),
+            ...(slotDuration === taskDuration
+              ? availableSlots.slice(i + 1) // Remove the slot if fully occupied
+              : [
+                  // Update the remaining slot
+                  { start: taskEndTime, end: slot.end },
+                ]),
+          ];
+
+          setFreeTime((prev) => ({ ...prev, [day]: updatedSlots }));
+          taskScheduled = true;
+          break; // Exit the slot loop for this day
+        }
+      }
+
+      if (taskScheduled) {
+        taskScheduledDays.push(day);
+        showPopup(`Added task "${task.name}" to ${day}`);
+      } else {
+        unscheduledDays.push(day);
       }
     }
 
-    alert(`No free time available for task "${task.name}" on ${task.day}`);
+    if (unscheduledDays.length > 0) {
+      alert(
+        `No free time available for task "${task.name}" on ${unscheduledDays.join(
+          ', '
+        )}`
+      );
+    }
+  };
+
+  const deleteTask = (taskIndex) => {
+    setTasks((prevTasks) => {
+      const updatedTasks = [...prevTasks];
+      const [removedTask] = updatedTasks.splice(taskIndex, 1);
+
+      // Re-add the time slot back to freeTime
+      setFreeTime((prevFreeTime) => {
+        const day = removedTask.day;
+        const updatedSlots = prevFreeTime[day] ? [...prevFreeTime[day]] : [];
+        updatedSlots.push({ start: removedTask.start, end: removedTask.end });
+
+        // Merge overlapping free time slots
+        const mergedSlots = mergeFreeTimeSlots(updatedSlots);
+
+        return { ...prevFreeTime, [day]: mergedSlots };
+      });
+
+      return updatedTasks;
+    });
+    showPopup(`Deleted task "${tasks[taskIndex].name}"`);
+  };
+
+  // Helper function to merge overlapping free time slots
+  const mergeFreeTimeSlots = (slots) => {
+    if (slots.length === 0) return [];
+    slots.sort((a, b) => a.start - b.start);
+    const merged = [slots[0]];
+
+    for (let i = 1; i < slots.length; i++) {
+      const last = merged[merged.length - 1];
+      const current = slots[i];
+
+      if (current.start <= last.end) {
+        last.end = Math.max(last.end, current.end);
+      } else {
+        merged.push(current);
+      }
+    }
+    return merged;
   };
 
   const showPopup = (message) => {
@@ -98,6 +162,7 @@ const App = () => {
             freeTime={freeTime}
             tasks={tasks}
             deleteFreeTime={deleteFreeTime}
+            deleteTask={deleteTask}
             minutesToTime={minutesToTime}
           />
         )}
